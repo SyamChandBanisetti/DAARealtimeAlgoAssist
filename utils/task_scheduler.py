@@ -1,7 +1,6 @@
 import streamlit as st
 
 def schedule_tasks(tasks):
-    # Sort tasks based on end time (greedy approach)
     tasks.sort(key=lambda x: x[1])
     selected = []
     last_end_time = 0
@@ -15,7 +14,7 @@ def schedule_tasks(tasks):
 def run_scheduler_app():
     st.header("📅 Task Scheduler")
     st.markdown("""
-    This tool schedules the **maximum number of non-overlapping tasks** based on start and end times.  
+    This tool schedules the **maximum number of non-overlapping tasks** based on start and end times.
     Used in: employee scheduling, event planning, job/task queueing, etc.
     """)
 
