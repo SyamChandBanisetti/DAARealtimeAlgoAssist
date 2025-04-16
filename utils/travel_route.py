@@ -1,3 +1,4 @@
+# utils/travel_route.py
 import streamlit as st
 import itertools
 
@@ -12,7 +13,7 @@ def solve_tsp_brute_force(distances):
     min_distance = float('inf')
     best_route = []
 
-    for perm in itertools.permutations(cities[1:]):
+    for perm in itertools.permutations(cities[1:]):  # Skipping the first city, i.e., City 1
         route = [0] + list(perm)
         dist = calculate_total_distance(route, distances)
         if dist < min_distance:
