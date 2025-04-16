@@ -12,7 +12,7 @@ def schedule_tasks(tasks):
             last_end_time = end
     return selected
 
-def run_task_scheduler_app():
+def run_scheduler_app():
     st.header("📅 Task Scheduler")
     st.markdown("""
     This tool schedules the **maximum number of non-overlapping tasks** based on start and end times.  
@@ -35,4 +35,5 @@ def run_task_scheduler_app():
     if st.button("🧠 Schedule Tasks"):
         selected = schedule_tasks(tasks)
         st.success(f"✅ {len(selected)} Task(s) Scheduled Successfully!")
-        for i, (start, end) in enumerate(selected,
+        for i, (start, end) in enumerate(selected, 1):
+            st.write(f"• Task {i}: Start = {start}, End = {end}")
