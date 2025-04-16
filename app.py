@@ -40,7 +40,7 @@ elif problem == "Knapsack (Zip Optimization)":
 elif problem == "Task Scheduler":
     run_scheduler_app()
 elif problem == "Travel Route Planner (TSP)":
-    run_travel_route_app()
+    run_tsp_app()
 elif problem == "Currency Converter":
     run_currency_converter_app()
 elif problem == "Sudoku Solver":
