@@ -22,16 +22,22 @@ def run_change_maker_app():
     st.header("💰 Currency Change Maker")
     st.markdown("""
     This tool helps compute the **minimum number of coins or notes** needed to make a given amount.  
-    Useful in banking systems, cash register algorithms, and coin vending systems.
+    Useful in **banking systems, cash registers**, and **vending machines**.
+
+    ---
+    ### 🧠 Approach:
+    We use **Dynamic Programming (DP)** to build up the optimal solution.
     
-    **Approach:**  
-    We use **Dynamic Programming (DP)** to find the optimal solution for the given amount.  
-    The idea is to iteratively compute the minimum number of coins required for each amount from 0 to the target amount.  
-    At each step, we check whether including a coin will result in fewer coins than previously computed, ensuring an efficient solution.
+    For each sub-amount, we calculate the fewest coins needed and reuse those results to solve larger amounts efficiently.
     """)
 
     coin_input = st.text_input("Enter coin/note denominations (comma-separated)", value="1,2,5,10,20,50,100")
-    coins = list(map(int, coin_input.strip().split(',')))
+    try:
+        coins = list(map(int, coin_input.strip().split(',')))
+    except:
+        st.error("⚠️ Please enter valid integers for coin denominations.")
+        return
+
     amount = st.number_input("Enter the total amount to change", min_value=1, value=57)
 
     if st.button("💸 Get Minimum Coins"):
@@ -40,5 +46,13 @@ def run_change_maker_app():
             st.error("❌ Cannot make this amount with the given denominations.")
         else:
             st.success(f"✅ Minimum Coins/Notes Required: {count}")
-            st.markdown("### Coins/Notes Used:")
-            st.write(used)
+            st.markdown("### 🪙 Coins/Notes Used:")
+
+            # Count usage per denomination
+            coin_count = {}
+            for coin in used:
+                coin_count[coin] = coin_count.get(coin, 0) + 1
+
+            # Display sorted in descending order
+            for coin in sorted(coin_count.keys(), reverse=True):
+                st.markdown(f"• ₹{coin} × {coin_count[coin]}")
