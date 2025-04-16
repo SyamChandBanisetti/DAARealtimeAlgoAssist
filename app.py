@@ -42,6 +42,6 @@ elif problem == "Task Scheduler":
 elif problem == "Travel Route Planner (TSP)":
     run_tsp_app()
 elif problem == "Currency Converter":
-    run_currency_converter_app()
+    run_change_maker_app()
 elif problem == "Sudoku Solver":
     run_sudoku_solver_app()
