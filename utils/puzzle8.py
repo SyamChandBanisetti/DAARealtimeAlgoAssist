@@ -3,6 +3,7 @@ import heapq
 
 goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
 
+# Heuristic function: Manhattan Distance
 def manhattan(state):
     distance = 0
     for i in range(3):
@@ -14,12 +15,14 @@ def manhattan(state):
                 distance += abs(goal_x - i) + abs(goal_y - j)
     return distance
 
+# Find position of 0 (blank)
 def find_zero(state):
     for i in range(3):
         for j in range(3):
             if state[i][j] == 0:
                 return i, j
 
+# Generate all valid next states
 def get_neighbors(state):
     x, y = find_zero(state)
     neighbors = []
@@ -31,9 +34,11 @@ def get_neighbors(state):
             neighbors.append(new_state)
     return neighbors
 
+# Check if two boards are equal
 def same(s1, s2):
     return all(s1[i][j] == s2[i][j] for i in range(3) for j in range(3))
 
+# A* Algorithm
 def solve_puzzle(start):
     queue = [(manhattan(start), 0, start, [])]
     visited = set()
@@ -54,14 +59,15 @@ def solve_puzzle(start):
             ))
     return []
 
+# Streamlit function to interact with the user
 def run_8puzzle_app():
     st.header("🧩 Real-Time 8-Puzzle Solver")
-    st.markdown(\"\"\"
+    st.markdown("""
     **How it works**: Rearrange the tiles to reach the goal configuration using the empty space.
     
     ✅ Solved using **A\* Search**  
     📍 Heuristic: **Manhattan Distance**
-    \"\"\")
+    """)
 
     default = [[1, 2, 3], [4, 0, 6], [7, 5, 8]]
     st.markdown("### Input your 3x3 puzzle (comma-separated values):")
