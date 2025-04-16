@@ -7,7 +7,7 @@ from utils.pathfinder import run_pathfinder_app
 from utils.knapsack import run_knapsack_app
 from utils.scheduler import run_scheduler_app
 from utils.travel_route import run_tsp_app
-from utils.currency_converter import run_currency_converter_app
+from utils.currency_converter import run_change_maker_app
 from utils.sudoku_solver import run_sudoku_solver_app
 
 # Set up the page config
