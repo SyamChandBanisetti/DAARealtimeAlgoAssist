@@ -1,5 +1,9 @@
 import streamlit as st
 import heapq
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.animation import FuncAnimation
+import numpy as np
 
 # Goal state for the 8-puzzle
 goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
@@ -63,12 +67,34 @@ def solve_puzzle(start):
             ))
     return []
 
+# Visual drawing of puzzle state
+def draw_puzzle(state):
+    fig, ax = plt.subplots(figsize=(3, 3))
+    ax.set_xlim(0, 3)
+    ax.set_ylim(0, 3)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.invert_yaxis()
+
+    for i in range(3):
+        for j in range(3):
+            val = state[i][j]
+            if val != 0:
+                rect = patches.Rectangle((j, i), 1, 1, edgecolor='black', facecolor='lightblue')
+                ax.add_patch(rect)
+                ax.text(j + 0.5, i + 0.5, str(val), va='center', ha='center', fontsize=16, weight='bold')
+            else:
+                rect = patches.Rectangle((j, i), 1, 1, edgecolor='gray', facecolor='white')
+                ax.add_patch(rect)
+
+    return fig
+
 # Streamlit UI
 def run_8puzzle_app():
     st.set_page_config(page_title="8-Puzzle Solver", layout="centered")
     st.title("🧩 8-Puzzle Solver")
     st.markdown("""
-    A real-time solver for the 8-tile sliding puzzle using **A\*** Search algorithm.  
+    A real-time solver for the 8-tile sliding puzzle using **A\\*** Search algorithm.  
     **Heuristic:** Manhattan Distance  
     Try rearranging the puzzle to see the solution path.
     ---
@@ -98,10 +124,23 @@ def run_8puzzle_app():
     if st.button("🧠 Solve Puzzle"):
         with st.spinner("Solving..."):
             solution = solve_puzzle(user_input)
+
         if not solution:
             st.error("🚫 No solution found. Try a different configuration.")
         else:
             st.success(f"✅ Solved in {len(solution)-1} moves!")
+
+            st.markdown("### 📜 Solution Steps")
             for idx, state in enumerate(solution):
                 st.markdown(f"**Step {idx}**")
                 st.table(state)
+
+            st.markdown("---")
+            st.markdown("### 🎞️ Animated Puzzle Solution")
+
+            for state in solution:
+                fig = draw_puzzle(state)
+                st.pyplot(fig)
+
+if __name__ == "__main__":
+    run_8puzzle_app()
