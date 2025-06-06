@@ -1,5 +1,11 @@
 import streamlit as st
 
+# Matplotlib imports for plotting and animations
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.animation import FuncAnimation
+import numpy as np
+
 def knapsack(weights, values, capacity):
     n = len(weights)
     dp = [[0] * (capacity + 1) for _ in range(n + 1)]
@@ -24,6 +30,29 @@ def knapsack(weights, values, capacity):
             w -= weights[i - 1]
 
     return dp[n][capacity], selected[::-1]
+
+def plot_knapsack(weights, values, capacity, selected):
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.set_title("Knapsack Selected Items Visualization")
+    ax.set_xlim(0, capacity)
+    ax.set_ylim(0, max(values) * 1.5)
+    ax.set_xlabel("Weight")
+    ax.set_ylabel("Value")
+
+    current_weight = 0
+    for idx in selected:
+        rect = patches.Rectangle((current_weight, 0), weights[idx], values[idx], linewidth=1,
+                                 edgecolor='blue', facecolor='cyan', alpha=0.7)
+        ax.add_patch(rect)
+        ax.text(current_weight + weights[idx] / 2, values[idx] / 2, f"Item {idx+1}\nW:{weights[idx]}\nV:{values[idx]}",
+                ha='center', va='center', fontsize=9, weight='bold')
+        current_weight += weights[idx]
+
+    # Draw capacity line
+    ax.axvline(x=capacity, color='red', linestyle='--', label='Knapsack Capacity')
+    ax.legend()
+
+    return fig
 
 def run_knapsack_app():
     st.set_page_config(page_title="🎒 Knapsack Optimizer", layout="centered")
@@ -62,6 +91,9 @@ def run_knapsack_app():
             st.subheader("📋 Selected Items Breakdown")
             for idx in selected:
                 st.markdown(f"- **Item {idx + 1}** → 🏋️ Weight: **{weights[idx]} kg**, 💵 Value: **₹{values[idx]}**")
+
+            fig = plot_knapsack(weights, values, capacity, selected)
+            st.pyplot(fig)
         else:
             st.warning("⚠️ No items were selected. Try adjusting item weights or increasing the knapsack capacity.")
 
