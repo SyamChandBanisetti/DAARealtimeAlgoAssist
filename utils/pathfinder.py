@@ -174,3 +174,66 @@ def run_pathfinder_app():
                 return
             if grid[sx][sy] == 1 or grid[ex][ey] == 1:
                 st.error("⚠️ Start or end point cannot be a wall (1).")
+                return
+
+            found, steps = dfs_animated(grid, (sx, sy), (ex, ey))
+            if found:
+                st.success(f"✅ Path found with {len(steps[-1])} steps!")
+
+                # Animate inside Streamlit
+                # Unfortunately, Streamlit cannot display matplotlib FuncAnimation directly
+                # So, save frames as images and show them one by one in Streamlit
+
+                # Convert each frame to an image
+                import io
+                from PIL import Image
+
+                images = []
+                for frame in range(len(steps)):
+                    fig, ax = plt.subplots(figsize=(cols / 2, rows / 2))
+                    ax.set_xlim(0, cols)
+                    ax.set_ylim(0, rows)
+                    ax.set_aspect('equal')
+                    ax.axis('off')
+
+                    for i in range(rows):
+                        for j in range(cols):
+                            if grid[i][j] == 1:
+                                draw_cell(ax, i, j, "wall")
+                            elif np.random.rand() < 0.1:  # random houses
+                                draw_cell(ax, i, j, "house")
+                            else:
+                                draw_cell(ax, i, j, "road")
+
+                    draw_cell(ax, sx, sy, "start")
+                    draw_cell(ax, ex, ey, "end")
+
+                    visited_cells = set(steps[frame])
+                    for cell in visited_cells:
+                        if cell != (sx, sy) and cell != (ex, ey):
+                            draw_cell(ax, cell[0], cell[1], "visited")
+
+                    for cell in steps[frame]:
+                        if cell != (sx, sy) and cell != (ex, ey):
+                            draw_cell(ax, cell[0], cell[1], "path")
+
+                    buf = io.BytesIO()
+                    plt.savefig(buf, format='png')
+                    plt.close(fig)
+                    buf.seek(0)
+                    img = Image.open(buf)
+                    images.append(img)
+
+                # Show animation by cycling images
+                import time
+                placeholder = st.empty()
+                for img in images:
+                    placeholder.image(img)
+                    time.sleep(0.2)
+            else:
+                st.error("🚫 No path found. Try changing the wall configuration.")
+        except Exception as e:
+            st.error(f"⚠️ Invalid input or error: {e}")
+
+if __name__ == "__main__":
+    run_pathfinder_app()
