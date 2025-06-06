@@ -1,46 +1,137 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.animation import FuncAnimation
 
-# DFS Algorithm
-def dfs(grid, start, end, visited=None, path=None):
-    if visited is None: visited = set()
-    if path is None: path = []
-    if start == end:
-        return path + [end]
-    x, y = start
-    visited.add((x, y))
-    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-        nx, ny = x + dx, y + dy
-        if 0 <= nx < len(grid) and 0 <= ny < len(grid[0]) and grid[nx][ny] == 0 and (nx, ny) not in visited:
-            result = dfs(grid, (nx, ny), end, visited, path + [start])
-            if result:
-                return result
-    return []
+# DFS with path exploration steps recorded for animation
+def dfs_animated(grid, start, end):
+    rows, cols = grid.shape
+    visited = set()
+    path = []
+    steps = []  # To record explored cells at each recursion step
 
-# Draw maze with path
-def display_maze(grid, path):
+    def dfs_util(x, y):
+        if not (0 <= x < rows and 0 <= y < cols):
+            return False
+        if grid[x][y] == 1 or (x, y) in visited:
+            return False
+
+        visited.add((x, y))
+        path.append((x, y))
+        steps.append(list(path))  # Record current path for animation
+
+        if (x, y) == end:
+            return True
+
+        # Explore neighbors in 4 directions
+        for dx, dy in [(-1,0),(1,0),(0,-1),(0,1)]:
+            nx, ny = x + dx, y + dy
+            if dfs_util(nx, ny):
+                return True
+
+        path.pop()
+        steps.append(list(path))  # Record backtrack step
+        return False
+
+    found = dfs_util(*start)
+    return found, steps
+
+def draw_cell(ax, x, y, cell_type):
+    # cell_type: "wall", "road", "house", "start", "end", "path"
+    colors = {
+        "wall": "#444444",      # dark gray walls
+        "road": "#F0F0F0",      # light gray roads (empty cells)
+        "house": "#FFDDC1",     # peach houses
+        "start": "#4CAF50",     # green start
+        "end": "#E91E63",       # pink end
+        "path": "#2196F3",      # blue path
+        "visited": "#BBDEFB"    # light blue visited cells
+    }
+    rect = patches.Rectangle((y, x), 1, 1, linewidth=1, edgecolor="gray", facecolor=colors[cell_type])
+    ax.add_patch(rect)
+
+def display_maze_animation(grid, steps, start, end):
     rows, cols = grid.shape
     fig, ax = plt.subplots(figsize=(cols / 2, rows / 2))
-    for i in range(rows):
-        for j in range(cols):
-            color = 'green' if (i, j) in path else ('black' if grid[i][j] == 1 else 'white')
-            rect = plt.Rectangle((j, rows - i - 1), 1, 1, facecolor=color, edgecolor='gray')
-            ax.add_patch(rect)
     ax.set_xlim(0, cols)
     ax.set_ylim(0, rows)
     ax.set_aspect('equal')
     ax.axis('off')
-    return fig
+
+    # Pre-draw houses randomly on some road cells for visual effect
+    houses = set()
+    np.random.seed(42)
+    for i in range(rows):
+        for j in range(cols):
+            if grid[i, j] == 0 and np.random.rand() < 0.1:  # 10% chance of house on road
+                houses.add((i, j))
+
+    def init():
+        ax.clear()
+        ax.set_xlim(0, cols)
+        ax.set_ylim(0, rows)
+        ax.set_aspect('equal')
+        ax.axis('off')
+        for i in range(rows):
+            for j in range(cols):
+                if grid[i][j] == 1:
+                    draw_cell(ax, i, j, "wall")
+                elif (i, j) in houses:
+                    draw_cell(ax, i, j, "house")
+                else:
+                    draw_cell(ax, i, j, "road")
+
+        draw_cell(ax, *start, "start")
+        draw_cell(ax, *end, "end")
+        return []
+
+    def update(frame):
+        ax.clear()
+        ax.set_xlim(0, cols)
+        ax.set_ylim(0, rows)
+        ax.set_aspect('equal')
+        ax.axis('off')
+        for i in range(rows):
+            for j in range(cols):
+                if grid[i][j] == 1:
+                    draw_cell(ax, i, j, "wall")
+                elif (i, j) in houses:
+                    draw_cell(ax, i, j, "house")
+                else:
+                    draw_cell(ax, i, j, "road")
+
+        draw_cell(ax, *start, "start")
+        draw_cell(ax, *end, "end")
+
+        visited_cells = set()
+        for pos in steps[frame]:
+            visited_cells.add(pos)
+
+        # Draw visited but not in current path
+        for cell in visited_cells:
+            if cell != start and cell != end:
+                draw_cell(ax, cell[0], cell[1], "visited")
+
+        # Draw current path (last step in steps[frame])
+        for cell in steps[frame]:
+            if cell != start and cell != end:
+                draw_cell(ax, cell[0], cell[1], "path")
+
+        return []
+
+    anim = FuncAnimation(fig, update, frames=len(steps), init_func=init, interval=250, repeat=False)
+
+    return anim
 
 # Streamlit App
 def run_pathfinder_app():
     st.set_page_config(page_title="DFS Maze Pathfinder", layout="centered")
     st.title("🧭 Maze Pathfinding using DFS")
-    
+
     st.markdown("""
     This tool visualizes the path from a **start** to an **end** point in a grid-based maze using  
-    **Depth-First Search (DFS)** algorithm.
+    **Depth-First Search (DFS)** algorithm with animation.
     
     ---
 
@@ -54,7 +145,7 @@ def run_pathfinder_app():
     cols = st.slider("🔢 Number of Columns", 5, 20, 10)
 
     st.markdown("### 🧱 Define Your Maze")
-    st.caption("Enter 0 for empty cell, 1 for wall — comma-separated per row:")
+    st.caption("Enter 0 for empty cell (road), 1 for wall — comma-separated per row:")
 
     grid = np.zeros((rows, cols), dtype=int)
     for i in range(rows):
@@ -83,17 +174,3 @@ def run_pathfinder_app():
                 return
             if grid[sx][sy] == 1 or grid[ex][ey] == 1:
                 st.error("⚠️ Start or end point cannot be a wall (1).")
-                return
-
-            path = dfs(grid, (sx, sy), (ex, ey))
-            if path:
-                st.success(f"✅ Path found with {len(path)} steps!")
-                fig = display_maze(grid, path)
-                st.pyplot(fig)
-            else:
-                st.error("🚫 No path found. Try changing the wall configuration.")
-        except:
-            st.error("⚠️ Invalid coordinates format. Use: row,col (e.g., 0,0)")
-
-if __name__ == "__main__":
-    run_pathfinder_app()
