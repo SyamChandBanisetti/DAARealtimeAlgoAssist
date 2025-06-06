@@ -1,8 +1,6 @@
-# app.py
-
 import streamlit as st
 
-# Import the individual algorithm app functions
+# Import the individual algorithm functions from the utils folder
 from utils.puzzle8 import run_8puzzle_app
 from utils.nqueens import run_nqueens_app
 from utils.pathfinder import run_pathfinder_app
@@ -12,23 +10,14 @@ from utils.travel_route import run_tsp_app
 from utils.currency_converter import run_change_maker_app
 from utils.sudoku_solver import run_sudoku_solver_app
 
-# Set up the Streamlit page configuration
-st.set_page_config(
-    page_title="🔍 Real-Time Algorithmic Assistant",
-    layout="wide"
-)
+# Set up the page config
+st.set_page_config(page_title="🔍 Real-Time Algorithmic Assistant", layout="wide")
 
-# App Title
+# Display main title
 st.title("🤖 Real-Time Algorithmic Assistant")
-st.markdown("""
-Welcome to your **all-in-one interactive algorithm playground**!  
-Select a problem from the sidebar to visualize and solve real-world computational challenges.
 
----
-""")
-
-# Sidebar selection
-problem = st.sidebar.selectbox("🧠 Choose a Problem to Explore", [
+# Sidebar for selecting problems
+problem = st.sidebar.selectbox("Choose a Problem to Explore", [
     "8-Puzzle Solver", 
     "N-Queens Problem", 
     "Pathfinding Maze", 
@@ -39,7 +28,7 @@ problem = st.sidebar.selectbox("🧠 Choose a Problem to Explore", [
     "Sudoku Solver"
 ])
 
-# Routing to selected algorithm app
+# Run the corresponding app based on user selection
 if problem == "8-Puzzle Solver":
     run_8puzzle_app()
 elif problem == "N-Queens Problem":
