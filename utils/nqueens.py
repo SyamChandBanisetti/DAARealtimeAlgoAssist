@@ -33,14 +33,14 @@ def solve_nqueens(n):
 
 def draw_board(board):
     n = len(board)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6, 6))
     for i in range(n):
         for j in range(n):
-            color = 'white' if (i + j) % 2 == 0 else 'gray'
+            color = '#f0d9b5' if (i + j) % 2 == 0 else '#b58863'  # classic chessboard colors
             rect = plt.Rectangle((j, n - i - 1), 1, 1, facecolor=color)
             ax.add_patch(rect)
             if board[i][j] == 1:
-                ax.text(j + 0.5, n - i - 1 + 0.5, "♛", fontsize=20, ha='center', va='center', color='red')
+                ax.text(j + 0.5, n - i - 1 + 0.5, "♛", fontsize=24, ha='center', va='center', color='black')
     ax.set_xlim(0, n)
     ax.set_ylim(0, n)
     ax.set_aspect('equal')
@@ -48,23 +48,37 @@ def draw_board(board):
     return fig
 
 def run_nqueens_app():
-    st.header("♛ N-Queens Solver (Backtracking)")
-    st.markdown("""
-    **Real-World Use**:
-    - Used in job/task scheduling
-    - Wireless channel allocation
-    - Circuit layout optimization
+    st.set_page_config(page_title="♛ N-Queens Solver", layout="centered")
+    st.title("♛ N-Queens Problem Solver")
 
-    ✅ Solved using **Backtracking**
+    st.markdown("""
+    The **N-Queens Problem** involves placing `N` queens on an `N x N` chessboard so that no two queens threaten each other.
+
+    ---
+    ✅ **Solving Method**: Backtracking  
+    📌 **Constraints**:
+    - Only one queen per row and column
+    - No two queens can share the same diagonal
+
+    🛠️ **Applications**:
+    - Scheduling jobs or exams
+    - Circuit design
+    - Wireless channel allocation
     """)
 
-    n = st.slider("Select size of board (N)", min_value=4, max_value=12, value=8)
+    n = st.slider("🔢 Select the number of queens (N)", min_value=4, max_value=12, value=8)
 
-    if st.button("🧠 Solve N-Queens"):
+    if st.button("🚀 Solve Now"):
         board = solve_nqueens(n)
         if board:
-            st.success(f"✅ Successfully placed {n} queens!")
+            st.success(f"✅ Successfully placed {n} queens without conflict!")
             fig = draw_board(board)
             st.pyplot(fig)
         else:
-            st.error("❌ No solution found.")
+            st.error("❌ No solution exists for this configuration.")
+
+    st.markdown("---")
+    st.caption("💡 Try different values of N to explore multiple board sizes!")
+
+if __name__ == "__main__":
+    run_nqueens_app()
