@@ -1,6 +1,6 @@
 import streamlit as st
 
-# Function to check if a number can be placed in the given position
+# Check if a number can be placed in given position
 def is_valid(board, row, col, num):
     for i in range(9):
         if board[row][i] == num or board[i][col] == num:
@@ -12,7 +12,7 @@ def is_valid(board, row, col, num):
                 return False
     return True
 
-# Backtracking function to solve Sudoku
+# Backtracking solver
 def solve_sudoku(board):
     for row in range(9):
         for col in range(9):
@@ -27,24 +27,45 @@ def solve_sudoku(board):
     return True
 
 def run_sudoku_solver_app():
-    st.header("🧩 Sudoku Solver")
+    st.title("🧩 Sudoku Solver")
     st.markdown("""
-    This tool will solve a Sudoku puzzle using the **Backtracking Algorithm**.  
-    You can enter a Sudoku puzzle, and it will return the solved puzzle in real-time.
-    
-    **Approach:**  
-    The **Backtracking** approach tries each number (1-9) in an empty cell and recursively checks if the board remains valid.  
-    If it finds a conflict, it backtracks and tries another number until the board is solved.
+    Enter your Sudoku puzzle below (use 0 for empty cells).  
+    The solver uses **Backtracking** to find the solution.
+
+    **Instructions:**  
+    - Input exactly 9 rows.  
+    - Each row must have 9 numbers separated by spaces (0-9).  
+    - Use 0 for empty cells.
     """)
 
     board_input = []
-    for i in range(9):
-        row = st.text_input(f"Row {i + 1} (9 space-separated numbers, 0 for empty)", value="0 0 0 0 0 0 0 0 0")
-        board_input.append(list(map(int, row.strip().split())))
+    input_valid = True
 
-    if st.button("🚀 Solve Sudoku"):
-        if solve_sudoku(board_input):
+    # Collect 9 rows of inputs in columns for better layout
+    cols = st.columns(3)
+    for i in range(9):
+        col = cols[i % 3]
+        row_str = col.text_input(f"Row {i+1}", "0 0 0 0 0 0 0 0 0", key=f"row{i}")
+        try:
+            row_vals = list(map(int, row_str.strip().split()))
+            if len(row_vals) != 9 or any(n < 0 or n > 9 for n in row_vals):
+                input_valid = False
+                col.error("Each row must have exactly 9 numbers between 0 and 9.")
+            board_input.append(row_vals)
+        except Exception:
+            input_valid = False
+            col.error("Invalid input. Please enter numbers only.")
+
+    if st.button("🚀 Solve Sudoku") and input_valid:
+        board = [row[:] for row in board_input]  # copy input
+        if solve_sudoku(board):
             st.success("✅ Sudoku Solved!")
-            st.write(board_input)
+            # Display solved board nicely
+            st.markdown("### Solved Puzzle:")
+            for row in board:
+                st.write(" ".join(str(num) for num in row))
         else:
             st.error("❌ No solution exists for the given puzzle.")
+    elif st.button("🚀 Solve Sudoku") and not input_valid:
+        st.error("⚠️ Please fix input errors above before solving.")
+
